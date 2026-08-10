@@ -1402,7 +1402,8 @@
 			url="images/pisada.png"
 			ath="2.18417023734617" 
 			atv="11.54342605462306"
-			linkedscene="scene_IMG_20260528_153130_00_033_p"
+			onclick="loadscene(scene_IMG_20260528_153130_00_033_p, null, MERGE, BLEND(1)); lookto(95, 7, 120);"
+			linkedscene=""
 			hlookat="44.9961938"
 			vlookat="3.8733444"
 			fov="90"
@@ -1623,9 +1624,9 @@
 			url="images/pisada.png"
 			ath="32.23607965374941" 
 			atv="8.26080947009676"
-			linkedscene="scene_IMG_20260528_153541_00_035"
-			hlookat="44.9961938"
-			vlookat="3.8733444"
+			onclick="loadscene(scene_IMG_20260528_153343_00_034_p, null, MERGE, BLEND(1)); lookto(-163, -3, 120);"
+			linkedscene=""
+			hlookat="-162" vlookat="-3"
 			fov="90"
 		/>
 
@@ -1727,7 +1728,8 @@
 			url="images/pisada.png"
 			ath="32.23607965374941" 
 			atv="8.26080947009676"
-			linkedscene="scene_IMG_20260528_153541_00_035"
+			onclick="loadscene(scene_IMG_20260528_153541_00_035, null, MERGE, BLEND(1)); lookto(104, 10, 120);"
+			linkedscene=""
 			hlookat="44.9961938"
 			vlookat="3.8733444"
 			fov="90"
@@ -1803,7 +1805,7 @@
 			rz="0" ox="0.00000000000000" 
 			oy="0.00000000000000" 
 			tx="0" ty="0" tz="0"
-			onclick="loadscene(scene_IMG_20260528_153541_00_035, null, MERGE, BLEND(0.5));"
+			onclick="loadscene(scene_IMG_20260528_153541_00_035, null, MERGE, BLEND(0.5)); lookto(104, 10, 120)"
 		/>
 
 		<hotspot 
@@ -1844,7 +1846,8 @@
 			url="images/pisada.png"
 			ath="57.20894915044971" 
 			atv="24.36738902666140"
-			linkedscene="scene_IMG_20260528_152913_00_029"
+			onclick="loadscene(scene_IMG_20260528_152913_00_029, null, MERGE, BLEND(0.5)); lookto(28, 3, 120)"
+			linkedscene=""
 			hlookat="44.9961938"
 			vlookat="3.8733444"
 			fov="90"
@@ -1984,24 +1987,9 @@
 		/>
 
 		<hotspot
-			name="spot7"
-			ath="-0.54113706061275" 
-			atv="21.44697168330049"
-			url="images/teoria.png"
-			scale="0.35"
-			depth="1000"
-			rx="-32.00000000000000"
-			ry="-3.50000000000000"
-			rz="0" ox="0.00000000000000"
-			oy="0.00000000000000"
-			tx="0" ty="0" tz="0"
-			onclick="on_click_almacen();"
-		/>
-
-		<hotspot
 			name="spot8"
- 			ath="41.11125027209613" 
-			atv="22.70496435902346"
+			ath="25.33668355303769" 
+			atv="8.98399670548537"
 			url="images/practica.png"
  			scale="0.35" 
 			depth="1000"
@@ -2010,7 +1998,7 @@
 			rz="0" ox="0.00000000000000"
 			oy="0.00000000000000"
 			tx="0" ty="0" tz="0"
-			onclick="on_click_almacen();"
+			onclick="openurl('aframe/mitosis.html', '_self');"
 		/>
 	</scene>
 

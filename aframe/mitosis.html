@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Práctica A-Frame</title>
+
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+</head>
+
+
+<body>
+
+<a-scene    
+    webxr="
+    requiredFeatures: local-floor;
+    optionalFeatures: bounded-floor;
+    ">
+
+
+
+    <!-- Fondo -->
+
+    <a-sky color="#101827"></a-sky>
+
+
+    <!-- Texto -->
+
+    <a-text
+        value="SIMULACIÓN DE MITOSIS"
+        align="center"
+        position="0 3 -4"
+        width="6"
+        color="#FFFFFF">
+    </a-text>
+
+
+    <!-- Célula -->
+
+    <a-sphere
+        position="0 1.5 -4"
+        radius="1.5"
+        color="#38BDF8"
+        material="
+            transparent: true;
+            opacity: 0.3;
+        ">
+    </a-sphere>
+
+
+    <!-- Núcleo -->
+
+    <a-sphere
+        position="0 1.5 -4"
+        radius="0.6"
+        color="#9333EA">
+    </a-sphere>
+
+
+    <!-- Botón volver -->
+
+    <a-box
+        id="volver"
+        class="clickable"
+        position="0 -0.5 -3"
+        width="2"
+        height="0.6"
+        depth="0.2"
+        color="#EF4444">
+
+        <a-text
+            value="VOLVER"
+            align="center"
+            position="0 0 0.12"
+            width="3"
+            color="#FFFFFF">
+        </a-text>
+
+    </a-box>
+
+
+    <!-- Cámara -->
+
+    <a-camera position="0 1.6 0">
+
+        <a-cursor
+            raycaster="objects: .clickable"
+            fuse="false"
+            color="#FFFFFF">
+        </a-cursor>
+
+    </a-camera>
+
+</a-scene>
+
+
+<script>
+
+    const volver =
+        document.getElementById("volver");
+
+
+    volver.addEventListener("click", () => {
+
+        window.location.href = "../index.html";
+
+    });
+
+</script>
+
+
+</body>
+
+</html>
