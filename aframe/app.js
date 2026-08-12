@@ -32,10 +32,10 @@ const raycasterMouse = new THREE.Raycaster();
 const dragPlane = new THREE.Plane();
 const dragTarget = new THREE.Vector3();
 const worldGrabOffset = new THREE.Vector3();
-const grabOffset = new THREE.Vector3();
 const grabLocalOffset = new THREE.Vector3();
 const localTarget = new THREE.Vector3();
 const velocity = new THREE.Vector3();
+let activeController = null;
 
 
 // =====================================================
@@ -149,6 +149,7 @@ rightController.addEventListener(
             objetoAgarrado = true;
             grabSource = "controller";
             isDragging = true;
+            activeController = rightController;
 
             const hitPoint = intersections[0].point;
             const objectWorldPos =
@@ -156,7 +157,7 @@ rightController.addEventListener(
                     new THREE.Vector3()
                 );
 
-            grabOffset.copy(objectWorldPos).sub(hitPoint);
+            worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
             dragTarget.copy(objectWorldPos);
             velocity.set(0, 0, 0);
 
@@ -166,6 +167,56 @@ rightController.addEventListener(
 
         }
 
+    }
+);
+
+// Left controller support
+leftController.addEventListener(
+    "triggerdown",
+    () => {
+        console.log("GATILLO IZQUIERDO");
+
+        const raycaster =
+            leftController.components.raycaster;
+
+        if (!raycaster) {
+            console.log("Raycaster no encontrado");
+            return;
+        }
+
+        const intersections = raycaster.intersections;
+        if (intersections.length === 0) {
+            console.log("No estoy apuntando a ningún objeto");
+            return;
+        }
+
+        const mesh = intersections[0].object;
+        const elemento = mesh.el;
+        if (!elemento) {
+            console.log("No se encontró el elemento A-Frame");
+            return;
+        }
+
+        console.log("Objeto detectado:", elemento.id);
+
+        if (elemento.classList.contains("grabbable")) {
+            objetoAgarrado = true;
+            grabSource = "controller";
+            isDragging = true;
+            activeController = leftController;
+
+            const hitPoint = intersections[0].point;
+            const objectWorldPos =
+                objetoMovible.object3D.getWorldPosition(
+                    new THREE.Vector3()
+                );
+
+            worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
+            dragTarget.copy(objectWorldPos);
+            velocity.set(0, 0, 0);
+
+            console.log("🔴 OBJETO AGARRADO (LEFT)");
+        }
     }
 );
 
@@ -266,15 +317,29 @@ rightController.addEventListener(
     () => {
 
         if (objetoAgarrado) {
-
-            console.log(
-                "🔴 OBJETO SOLTADO"
-            );
-
+            console.log("🔴 OBJETO SOLTADO");
         }
 
         objetoAgarrado = false;
+        if (activeController === rightController) {
+            activeController = null;
+            isDragging = false;
+        }
 
+    }
+);
+
+leftController.addEventListener(
+    "triggerup",
+    () => {
+        if (objetoAgarrado) {
+            console.log("🔴 OBJETO SOLTADO");
+        }
+        objetoAgarrado = false;
+        if (activeController === leftController) {
+            activeController = null;
+            isDragging = false;
+        }
     }
 );
 
@@ -290,17 +355,10 @@ function actualizarObjeto() {
     }
 
     if (grabSource === "controller") {
-
-        const controllerPosition =
-            new THREE.Vector3();
-
-        rightController.object3D.getWorldPosition(
-            controllerPosition
-        );
-
-        dragTarget.copy(controllerPosition).add(
-            worldGrabOffset
-        );
+        if (!activeController) return;
+        const controllerPosition = new THREE.Vector3();
+        activeController.object3D.getWorldPosition(controllerPosition);
+        dragTarget.copy(controllerPosition).add(worldGrabOffset);
 
     } else if (grabSource === "mouse") {
 
