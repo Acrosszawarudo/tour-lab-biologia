@@ -155,6 +155,18 @@
 
     </a-entity>
 
+    <!-- ================================================= -->
+    <!-- ESFERA ROJA -->
+    <!-- ================================================= -->
+
+    <a-sphere
+        id="objetoMovible"
+        class="grabbable"
+        position="-2 1.5 -2"
+        radius="0.3"
+        color="#EF4444">
+    </a-sphere>
+
 
     <!-- ================================================= -->
     <!-- BOTÓN DE PRUEBA -->
@@ -232,7 +244,7 @@
         laser-controls="hand: right"
         meta-touch-controls="hand: right"
         raycaster="
-            objects: .clickable;
+            objects: .clickable, .grabbable;
             far: 10;
         "
         line="
@@ -403,7 +415,91 @@ cromosoma2.addEventListener(
     }
 );
 
+const objetoMovible =
+    document.getElementById("objetoMovible");
 
+let objetoAgarrado = false;
+
+
+// Cuando presionamos el gatillo
+rightController.addEventListener(
+    "triggerdown",
+    () => {
+
+        const intersections =
+            rightController.components
+                .raycaster
+                .intersections;
+
+        if (intersections.length === 0) {
+            return;
+        }
+
+        const objeto =
+            intersections[0].object.el;
+
+        if (
+            objeto &&
+            objeto.classList.contains("grabbable")
+        ) {
+
+            objetoAgarrado = true;
+
+            console.log(
+                "Objeto agarrado"
+            );
+
+        }
+
+    }
+);
+
+
+// Cuando soltamos el gatillo
+rightController.addEventListener(
+    "triggerup",
+    () => {
+
+        objetoAgarrado = false;
+
+        console.log(
+            "Objeto soltado"
+        );
+
+    }
+);
+
+function actualizarObjeto() {
+
+    if (!objetoAgarrado) {
+        return;
+    }
+
+    const posicion =
+        rightController.object3D
+            .position;
+
+    const rotacion =
+        rightController.object3D
+            .rotation;
+
+    objetoMovible.object3D.position.copy(
+        posicion
+    );
+
+    objetoMovible.object3D.rotation.copy(
+        rotacion
+    );
+}
+
+function loop() {
+
+    actualizarObjeto();
+
+    requestAnimationFrame(loop);
+}
+
+loop();
 </script>
 
 
