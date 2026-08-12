@@ -29,7 +29,13 @@ const camara =
 
 const mouse = new THREE.Vector2();
 const raycasterMouse = new THREE.Raycaster();
-const dragIntersection = new THREE.Vector3();
+const dragPlane = new THREE.Plane();
+const dragTarget = new THREE.Vector3();
+const worldGrabOffset = new THREE.Vector3();
+const grabOffset = new THREE.Vector3();
+const grabLocalOffset = new THREE.Vector3();
+const localTarget = new THREE.Vector3();
+const velocity = new THREE.Vector3();
 
 
 // =====================================================
@@ -38,6 +44,7 @@ const dragIntersection = new THREE.Vector3();
 
 let objetoAgarrado = false;
 let grabSource = null;
+let isDragging = false;
 
 
 // =====================================================
@@ -141,6 +148,17 @@ rightController.addEventListener(
 
             objetoAgarrado = true;
             grabSource = "controller";
+            isDragging = true;
+
+            const hitPoint = intersections[0].point;
+            const objectWorldPos =
+                objetoMovible.object3D.getWorldPosition(
+                    new THREE.Vector3()
+                );
+
+            grabOffset.copy(objectWorldPos).sub(hitPoint);
+            dragTarget.copy(objectWorldPos);
+            velocity.set(0, 0, 0);
 
             console.log(
                 "🔴 OBJETO AGARRADO"
@@ -155,19 +173,56 @@ rightController.addEventListener(
 // MOUSE GRAB PARA DESKTOP
 // =====================================================
 
-objetoMovible.addEventListener(
+window.addEventListener(
     "mousedown",
     (event) => {
-
-        objetoAgarrado = true;
-        grabSource = "mouse";
 
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        console.log(
-            "🔴 ESFERA ROJA AGARRADA POR MOUSE"
+        const cameraObject = camara.getObject3D("camera");
+
+        if (!cameraObject) {
+            return;
+        }
+
+        raycasterMouse.setFromCamera(
+            mouse,
+            cameraObject
         );
+
+        if (!objetoMovible.object3D) {
+            return;
+        }
+
+        const intersects =
+            raycasterMouse.intersectObject(
+                objetoMovible.object3D,
+                true
+            );
+
+        if (intersects.length > 0) {
+            objetoAgarrado = true;
+            grabSource = "mouse";
+            isDragging = true;
+
+            const hitPoint = intersects[0].point.clone();
+            const cameraObject = camara.getObject3D("camera");
+
+            if (!cameraObject) {
+                return;
+            }
+
+            grabLocalOffset.copy(
+                cameraObject.worldToLocal(hitPoint)
+            );
+
+            velocity.set(0, 0, 0);
+
+            console.log(
+                "🔴 ESFERA ROJA AGARRADA POR MOUSE"
+            );
+        }
 
     }
 );
@@ -196,6 +251,7 @@ window.addEventListener(
 
         objetoAgarrado = false;
         grabSource = null;
+        dragPlane.makeEmpty();
 
     }
 );
@@ -242,18 +298,11 @@ function actualizarObjeto() {
             controllerPosition
         );
 
-        objetoMovible.object3D.parent.worldToLocal(
-            controllerPosition
+        dragTarget.copy(controllerPosition).add(
+            worldGrabOffset
         );
 
-        objetoMovible.object3D.position.copy(
-            controllerPosition
-        );
-
-        return;
-    }
-
-    if (grabSource === "mouse") {
+    } else if (grabSource === "mouse") {
 
         const cameraObject =
             camara.getObject3D("camera");
@@ -262,34 +311,46 @@ function actualizarObjeto() {
             return;
         }
 
-        raycasterMouse.setFromCamera(
-            mouse,
-            cameraObject
-        );
-
-        const plane = new THREE.Plane(
-            new THREE.Vector3(0, 1, 0),
-            -objetoMovible.object3D.position.y
-        );
-
-        const intersection =
+        const cameraWorldPos =
             new THREE.Vector3();
+        cameraObject.getWorldPosition(cameraWorldPos);
 
-        raycasterMouse.ray.intersectPlane(
-            plane,
-            intersection
-        );
+        const cameraDir =
+            new THREE.Vector3();
+        cameraObject.getWorldDirection(cameraDir);
 
-        if (intersection) {
-            objetoMovible.object3D.parent.worldToLocal(
-                intersection
+        const holdDistance = 1.2;
+        const desiredWorldPos =
+            cameraWorldPos.add(
+                cameraDir.multiplyScalar(
+                    holdDistance
+                )
             );
 
-            objetoMovible.object3D.position.copy(
-                intersection
-            );
-        }
+        dragTarget.copy(desiredWorldPos);
 
+    } else {
+        return;
+    }
+
+    const currentLocal =
+        objetoMovible.object3D.position;
+
+    localTarget.copy(dragTarget);
+    objetoMovible.object3D.parent.worldToLocal(
+        localTarget
+    );
+
+    const smoothing = 0.22;
+    const delta = new THREE.Vector3()
+        .subVectors(localTarget, currentLocal)
+        .multiplyScalar(smoothing);
+
+    velocity.add(delta).multiplyScalar(0.85);
+    currentLocal.add(velocity);
+
+    if (!objetoAgarrado && velocity.lengthSq() < 0.00001) {
+        velocity.set(0, 0, 0);
     }
 
 }
