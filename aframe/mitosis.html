@@ -262,7 +262,8 @@
         position="0 1.6 0">
 
         <a-cursor
-            raycaster="objects: .clickable"
+            cursor="rayOrigin: mouse"
+            raycaster="objects: .clickable, .grabbable"
             fuse="false"
             color="#FFFFFF">
         </a-cursor>
@@ -273,11 +274,7 @@
 </a-scene>
 
 
-<!-- ================================================= -->
-<!-- JAVASCRIPT -->
-<!-- ================================================= -->
-
-<script src="./js/mitosis.js"></script>
+<script src="app.js"></script>
 
 
 </body>

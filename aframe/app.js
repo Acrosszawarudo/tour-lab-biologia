@@ -1,3 +1,4 @@
+
 // =====================================================
 // OBTENER ELEMENTOS
 // =====================================================
@@ -23,12 +24,16 @@ const rightController =
 const objetoMovible =
     document.getElementById("objetoMovible");
 
+const camara =
+    document.querySelector("a-camera");
+
 
 // =====================================================
-// VARIABLES
+// VARIABLES DEL OBJETO
 // =====================================================
 
 let objetoAgarrado = false;
+let grabSource = null;
 
 
 // =====================================================
@@ -58,7 +63,7 @@ botonPrueba.addEventListener(
 
 
 // =====================================================
-// CONTROL DERECHO
+// GATILLO DERECHO
 // =====================================================
 
 rightController.addEventListener(
@@ -84,7 +89,9 @@ rightController.addEventListener(
             raycaster.intersections;
 
 
-        if (intersections.length === 0) {
+        if (
+            intersections.length === 0
+        ) {
 
             console.log(
                 "No estoy apuntando a ningún objeto"
@@ -93,6 +100,8 @@ rightController.addEventListener(
             return;
         }
 
+
+        // Obtener el objeto detectado
 
         const mesh =
             intersections[0].object;
@@ -118,7 +127,7 @@ rightController.addEventListener(
         );
 
 
-        // Comprobar si el objeto se puede agarrar
+        // Comprobar si es agarrable
 
         if (
             elemento.classList.contains(
@@ -127,12 +136,47 @@ rightController.addEventListener(
         ) {
 
             objetoAgarrado = true;
+            grabSource = "controller";
 
             console.log(
                 "🔴 OBJETO AGARRADO"
             );
 
         }
+
+    }
+);
+
+// =====================================================
+// MOUSE GRAB PARA DESKTOP
+// =====================================================
+
+objetoMovible.addEventListener(
+    "click",
+    () => {
+
+        objetoAgarrado = true;
+        grabSource = "mouse";
+
+        console.log(
+            "🔴 ESFERA ROJA AGARRADA POR MOUSE"
+        );
+
+    }
+);
+
+window.addEventListener(
+    "mouseup",
+    () => {
+
+        if (objetoAgarrado) {
+            console.log(
+                "🔴 OBJETO SOLTADO"
+            );
+        }
+
+        objetoAgarrado = false;
+        grabSource = null;
 
     }
 );
@@ -161,7 +205,7 @@ rightController.addEventListener(
 
 
 // =====================================================
-// MOVER OBJETO
+// ACTUALIZAR POSICIÓN DEL OBJETO
 // =====================================================
 
 function actualizarObjeto() {
@@ -170,100 +214,83 @@ function actualizarObjeto() {
         return;
     }
 
+    if (grabSource === "controller") {
 
-    const controllerPosition =
-        new THREE.Vector3();
+        const controllerPosition =
+            new THREE.Vector3();
 
+        rightController.object3D.getWorldPosition(
+            controllerPosition
+        );
 
-    // Obtener posición mundial del control
+        objetoMovible.object3D.parent.worldToLocal(
+            controllerPosition
+        );
 
-    rightController.object3D.getWorldPosition(
-        controllerPosition
-    );
+        objetoMovible.object3D.position.copy(
+            controllerPosition
+        );
 
+        return;
+    }
 
-    // Convertir posición al sistema
-    // de coordenadas de la esfera
+    if (grabSource === "mouse") {
 
-    objetoMovible.object3D.parent.worldToLocal(
-        controllerPosition
-    );
+        const cameraWorldPos =
+            new THREE.Vector3();
+        const cameraDir =
+            new THREE.Vector3();
 
+        camara.object3D.getWorldPosition(
+            cameraWorldPos
+        );
 
-    // Actualizar posición de la esfera
+        camara.object3D.getWorldDirection(
+            cameraDir
+        );
 
-    objetoMovible.object3D.position.copy(
-        controllerPosition
-    );
+        const plane = new THREE.Plane(
+            new THREE.Vector3(0, 1, 0),
+            -objetoMovible.object3D.position.y
+        );
+
+        const ray = new THREE.Ray(
+            cameraWorldPos,
+            cameraDir
+        );
+
+        const intersection =
+            new THREE.Vector3();
+
+        ray.intersectPlane(
+            plane,
+            intersection
+        );
+
+        if (intersection) {
+            objetoMovible.object3D.parent.worldToLocal(
+                intersection
+            );
+
+            objetoMovible.object3D.position.copy(
+                intersection
+            );
+        }
+
+    }
 
 }
 
 
 // =====================================================
-// CROMOSOMA 1
-// =====================================================
-
-cromosoma1.addEventListener(
-    "click",
-    () => {
-
-        console.log(
-            "Cromosoma 1 seleccionado"
-        );
-
-        cromosoma1.setAttribute(
-            "scale",
-            "1.5 1.5 1.5"
-        );
-
-    }
-);
-
-
-// =====================================================
-// CROMOSOMA 2
-// =====================================================
-
-cromosoma2.addEventListener(
-    "click",
-    () => {
-
-        console.log(
-            "Cromosoma 2 seleccionado"
-        );
-
-        cromosoma2.setAttribute(
-            "scale",
-            "1.5 1.5 1.5"
-        );
-
-    }
-);
-
-
-// =====================================================
-// CONTROL IZQUIERDO
-// =====================================================
-
-leftController.addEventListener(
-    "triggerdown",
-    () => {
-
-        console.log(
-            "GATILLO IZQUIERDO"
-        );
-
-    }
-);
-
-
-// =====================================================
-// VOLVER
+// BOTÓN VOLVER
 // =====================================================
 
 volver.addEventListener(
     "click",
     () => {
+
+        console.log("VOLVER PRESIONADO");
 
         window.location.href =
             "../index.html";
@@ -273,7 +300,7 @@ volver.addEventListener(
 
 
 // =====================================================
-// LOOP
+// LOOP PRINCIPAL
 // =====================================================
 
 function loop() {
@@ -285,5 +312,8 @@ function loop() {
     );
 
 }
+
+
+// Iniciar loop
 
 loop();
