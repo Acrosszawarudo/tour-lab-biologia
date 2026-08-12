@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Laboratorio - Mitosis</title>
+
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+</head>
+
+
+<body>
+
+<a-scene
+    background="color: #101827"
+    webxr="
+        requiredFeatures: local-floor;
+        optionalFeatures: bounded-floor;
+    "
+>
+
+
+    <!-- ================================================= -->
+    <!-- ILUMINACIÓN -->
+    <!-- ================================================= -->
+
+    <a-light
+        type="ambient"
+        intensity="1.5">
+    </a-light>
+
+    <a-light
+        type="point"
+        position="0 4 -2"
+        intensity="2">
+    </a-light>
+
+
+    <!-- ================================================= -->
+    <!-- PISO -->
+    <!-- ================================================= -->
+
+    <a-plane
+        position="0 0 -4"
+        rotation="-90 0 0"
+        width="10"
+        height="10"
+        color="#1E293B">
+    </a-plane>
+
+
+    <!-- ================================================= -->
+    <!-- TÍTULO -->
+    <!-- ================================================= -->
+
+    <a-text
+        value="SIMULACIÓN DE MITOSIS"
+        align="center"
+        position="0 3.5 -4"
+        width="6"
+        color="#FFFFFF">
+    </a-text>
+
+
+    <!-- ================================================= -->
+    <!-- CÉLULA -->
+    <!-- ================================================= -->
+
+    <a-sphere
+        id="celula"
+        position="0 1.7 -4"
+        radius="1.5"
+        color="#38BDF8"
+        material="
+            transparent: true;
+            opacity: 0.25;
+            side: double;
+        ">
+    </a-sphere>
+
+
+    <!-- ================================================= -->
+    <!-- NÚCLEO -->
+    <!-- ================================================= -->
+
+    <a-sphere
+        id="nucleo"
+        position="0 1.7 -4"
+        radius="0.65"
+        color="#9333EA">
+    </a-sphere>
+
+
+    <!-- ================================================= -->
+    <!-- CROMOSOMA 1 -->
+    <!-- ================================================= -->
+
+    <a-entity
+        id="cromosoma1"
+        class="clickable"
+        position="-0.6 1.7 -4"
+        rotation="0 0 45">
+
+        <a-box
+            width="0.12"
+            height="0.7"
+            depth="0.12"
+            color="#EF4444">
+        </a-box>
+
+        <a-box
+            width="0.12"
+            height="0.7"
+            depth="0.12"
+            color="#EF4444"
+            rotation="0 0 90">
+        </a-box>
+
+    </a-entity>
+
+
+    <!-- ================================================= -->
+    <!-- CROMOSOMA 2 -->
+    <!-- ================================================= -->
+
+    <a-entity
+        id="cromosoma2"
+        class="clickable"
+        position="0.6 1.7 -4"
+        rotation="0 0 45">
+
+        <a-box
+            width="0.12"
+            height="0.7"
+            depth="0.12"
+            color="#F59E0B">
+        </a-box>
+
+        <a-box
+            width="0.12"
+            height="0.7"
+            depth="0.12"
+            color="#F59E0B"
+            rotation="0 0 90">
+        </a-box>
+
+    </a-entity>
+
+
+    <!-- ================================================= -->
+    <!-- BOTÓN DE PRUEBA -->
+    <!-- ================================================= -->
+
+    <a-box
+        id="botonPrueba"
+        class="clickable"
+        position="0 0.7 -2.5"
+        width="2"
+        height="0.7"
+        depth="0.25"
+        color="#22C55E">
+
+        <a-text
+            value="PROBAR CONTROL"
+            align="center"
+            position="0 0 0.14"
+            width="3"
+            color="#FFFFFF">
+        </a-text>
+
+    </a-box>
+
+
+    <!-- ================================================= -->
+    <!-- BOTÓN VOLVER -->
+    <!-- ================================================= -->
+
+    <a-box
+        id="volver"
+        class="clickable"
+        position="3 0.7 -3"
+        width="1.5"
+        height="0.6"
+        depth="0.2"
+        color="#EF4444">
+
+        <a-text
+            value="VOLVER"
+            align="center"
+            position="0 0 0.12"
+            width="2.5"
+            color="#FFFFFF">
+        </a-text>
+
+    </a-box>
+
+
+    <!-- ================================================= -->
+    <!-- CONTROL IZQUIERDO -->
+    <!-- ================================================= -->
+
+    <a-entity
+        id="leftController"
+        laser-controls="hand: left"
+        meta-touch-controls="hand: left"
+        raycaster="
+            objects: .clickable;
+            far: 10;
+        "
+        line="
+            color: #00FF00;
+            opacity: 0.8;
+        ">
+    </a-entity>
+
+
+    <!-- ================================================= -->
+    <!-- CONTROL DERECHO -->
+    <!-- ================================================= -->
+
+    <a-entity
+        id="rightController"
+        laser-controls="hand: right"
+        meta-touch-controls="hand: right"
+        raycaster="
+            objects: .clickable;
+            far: 10;
+        "
+        line="
+            color: #00FF00;
+            opacity: 0.8;
+        ">
+    </a-entity>
+
+
+    <!-- ================================================= -->
+    <!-- CÁMARA -->
+    <!-- ================================================= -->
+
+    <a-camera
+        position="0 1.6 0">
+
+        <a-cursor
+            raycaster="objects: .clickable"
+            fuse="false"
+            color="#FFFFFF">
+        </a-cursor>
+
+    </a-camera>
+
+
+</a-scene>
+
+
+<script>
+
+
+// =====================================================
+// OBTENER ELEMENTOS
+// =====================================================
+
+const botonPrueba =
+    document.getElementById("botonPrueba");
+
+const volver =
+    document.getElementById("volver");
+
+const cromosoma1 =
+    document.getElementById("cromosoma1");
+
+const cromosoma2 =
+    document.getElementById("cromosoma2");
+
+const leftController =
+    document.getElementById("leftController");
+
+const rightController =
+    document.getElementById("rightController");
+
+
+// =====================================================
+// BOTÓN DE PRUEBA
+// =====================================================
+
+botonPrueba.addEventListener(
+    "click",
+    () => {
+
+        console.log(
+            "BOTÓN PRESIONADO"
+        );
+
+        botonPrueba.setAttribute(
+            "color",
+            "#EF4444"
+        );
+
+        botonPrueba
+            .querySelector("a-text")
+            .setAttribute(
+                "value",
+                "¡FUNCIONA!"
+            );
+
+    }
+);
+
+
+// =====================================================
+// CONTROL DERECHO
+// =====================================================
+
+rightController.addEventListener(
+    "triggerdown",
+    () => {
+
+        console.log(
+            "GATILLO DERECHO"
+        );
+
+    }
+);
+
+
+// =====================================================
+// CONTROL IZQUIERDO
+// =====================================================
+
+leftController.addEventListener(
+    "triggerdown",
+    () => {
+
+        console.log(
+            "GATILLO IZQUIERDO"
+        );
+
+    }
+);
+
+
+// =====================================================
+// VOLVER A KRPANO
+// =====================================================
+
+volver.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "../index.html";
+
+    }
+);
+
+
+// =====================================================
+// SELECCIONAR CROMOSOMA 1
+// =====================================================
+
+cromosoma1.addEventListener(
+    "click",
+    () => {
+
+        console.log(
+            "Cromosoma 1 seleccionado"
+        );
+
+        cromosoma1.setAttribute(
+            "scale",
+            "1.5 1.5 1.5"
+        );
+
+    }
+);
+
+
+// =====================================================
+// SELECCIONAR CROMOSOMA 2
+// =====================================================
+
+cromosoma2.addEventListener(
+    "click",
+    () => {
+
+        console.log(
+            "Cromosoma 2 seleccionado"
+        );
+
+        cromosoma2.setAttribute(
+            "scale",
+            "1.5 1.5 1.5"
+        );
+
+    }
+);
+
+
+</script>
+
+
+</body>
+
+</html>
