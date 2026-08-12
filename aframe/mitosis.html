@@ -28,7 +28,6 @@
     "
 >
 
-
     <!-- ================================================= -->
     <!-- ILUMINACIÓN -->
     <!-- ================================================= -->
@@ -155,8 +154,9 @@
 
     </a-entity>
 
+
     <!-- ================================================= -->
-    <!-- ESFERA ROJA -->
+    <!-- ESFERA ROJA MOVIBLE -->
     <!-- ================================================= -->
 
     <a-sphere
@@ -273,234 +273,11 @@
 </a-scene>
 
 
-<script>
-
-
-// =====================================================
-// OBTENER ELEMENTOS
-// =====================================================
-
-const botonPrueba =
-    document.getElementById("botonPrueba");
-
-const volver =
-    document.getElementById("volver");
-
-const cromosoma1 =
-    document.getElementById("cromosoma1");
-
-const cromosoma2 =
-    document.getElementById("cromosoma2");
-
-const leftController =
-    document.getElementById("leftController");
-
-const rightController =
-    document.getElementById("rightController");
-
-
-// =====================================================
-// BOTÓN DE PRUEBA
-// =====================================================
-
-botonPrueba.addEventListener(
-    "click",
-    () => {
-
-        console.log(
-            "BOTÓN PRESIONADO"
-        );
-
-        botonPrueba.setAttribute(
-            "color",
-            "#EF4444"
-        );
-
-        botonPrueba
-            .querySelector("a-text")
-            .setAttribute(
-                "value",
-                "¡FUNCIONA!"
-            );
-
-    }
-);
-
-
-// =====================================================
-// CONTROL DERECHO
-// =====================================================
-
-rightController.addEventListener(
-    "triggerdown",
-    () => {
-
-        console.log(
-            "GATILLO DERECHO"
-        );
-
-    }
-);
-
-
-// =====================================================
-// CONTROL IZQUIERDO
-// =====================================================
-
-leftController.addEventListener(
-    "triggerdown",
-    () => {
-
-        console.log(
-            "GATILLO IZQUIERDO"
-        );
-
-    }
-);
-
-
-// =====================================================
-// VOLVER A KRPANO
-// =====================================================
-
-volver.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "../index.html";
-
-    }
-);
-
-
-// =====================================================
-// SELECCIONAR CROMOSOMA 1
-// =====================================================
-
-cromosoma1.addEventListener(
-    "click",
-    () => {
-
-        console.log(
-            "Cromosoma 1 seleccionado"
-        );
-
-        cromosoma1.setAttribute(
-            "scale",
-            "1.5 1.5 1.5"
-        );
-
-    }
-);
-
-
-// =====================================================
-// SELECCIONAR CROMOSOMA 2
-// =====================================================
-
-cromosoma2.addEventListener(
-    "click",
-    () => {
-
-        console.log(
-            "Cromosoma 2 seleccionado"
-        );
-
-        cromosoma2.setAttribute(
-            "scale",
-            "1.5 1.5 1.5"
-        );
-
-    }
-);
-
-const objetoMovible =
-    document.getElementById("objetoMovible");
-
-let objetoAgarrado = false;
-
-
-// Cuando presionamos el gatillo
-rightController.addEventListener(
-    "triggerdown",
-    () => {
-
-        const intersections =
-            rightController.components
-                .raycaster
-                .intersections;
-
-        if (intersections.length === 0) {
-            return;
-        }
-
-        const objeto =
-            intersections[0].object.el;
-
-        if (
-            objeto &&
-            objeto.classList.contains("grabbable")
-        ) {
-
-            objetoAgarrado = true;
-
-            console.log(
-                "Objeto agarrado"
-            );
-
-        }
-
-    }
-);
-
-
-// Cuando soltamos el gatillo
-rightController.addEventListener(
-    "triggerup",
-    () => {
-
-        objetoAgarrado = false;
-
-        console.log(
-            "Objeto soltado"
-        );
-
-    }
-);
-
-function actualizarObjeto() {
-
-    if (!objetoAgarrado) {
-        return;
-    }
-
-    const posicion =
-        rightController.object3D
-            .position;
-
-    const rotacion =
-        rightController.object3D
-            .rotation;
-
-    objetoMovible.object3D.position.copy(
-        posicion
-    );
-
-    objetoMovible.object3D.rotation.copy(
-        rotacion
-    );
-}
-
-function loop() {
-
-    actualizarObjeto();
-
-    requestAnimationFrame(loop);
-}
-
-loop();
-</script>
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
+
+<script src="./js/mitosis.js"></script>
 
 
 </body>
