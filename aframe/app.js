@@ -37,6 +37,50 @@ const localTarget = new THREE.Vector3();
 const velocity = new THREE.Vector3();
 let activeController = null;
 
+// =============================
+// PANEL DE DEBUG EN VR
+// =============================
+
+function ensureDebugPanel() {
+    if (document.getElementById("debugText")) return;
+    const scene = document.querySelector("a-scene");
+    if (!scene) return;
+    const debug = document.createElement("a-entity");
+    debug.setAttribute("id", "debugText");
+    debug.setAttribute("position", "0 1.6 -1");
+    debug.setAttribute("rotation", "0 0 0");
+    debug.setAttribute("text", "value:; align: left; width: 1.8; color: #FFFFFF; shader: msdf;");
+    scene.appendChild(debug);
+    window.__debugLines = [];
+}
+
+function showDebug(msg) {
+    try {
+        ensureDebugPanel();
+        window.__debugLines = window.__debugLines || [];
+        const s = (typeof msg === 'object') ? JSON.stringify(msg) : String(msg);
+        // push and keep last 8 lines
+        window.__debugLines.push(s);
+        if (window.__debugLines.length > 8) window.__debugLines.shift();
+        const el = document.getElementById("debugText");
+        if (el) el.setAttribute("text", "value: " + window.__debugLines.join("\n"));
+    } catch (e) {
+        // swallow
+    }
+}
+
+// Mirror console.log to on-screen debug panel (keeps original behavior)
+(() => {
+    const orig = console.log.bind(console);
+    console.log = function(...args) {
+        try {
+            const txt = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+            showDebug(txt);
+        } catch (e) {}
+        orig(...args);
+    };
+})();
+
 
 // =====================================================
 // VARIABLES DEL OBJETO
@@ -114,28 +158,16 @@ rightController.addEventListener(
 
         // Obtener el objeto detectado
 
-        const mesh =
-            intersections[0].object;
-
-
-        const elemento =
-            mesh.el;
-
+        const inter = intersections[0];
+        const mesh = inter.object;
+        const elemento = inter.el || (mesh && mesh.el);
 
         if (!elemento) {
-
-            console.log(
-                "No se encontró el elemento A-Frame"
-            );
-
+            console.log("No se encontró el elemento A-Frame");
             return;
         }
 
-
-        console.log(
-            "Objeto detectado:",
-            elemento.id
-        );
+        console.log("Objeto detectado:", elemento.id, "(intersect id:", inter.object && inter.object.id, ")");
 
 
         // Comprobar si es agarrable
@@ -151,15 +183,13 @@ rightController.addEventListener(
             isDragging = true;
             activeController = rightController;
 
-            const hitPoint = intersections[0].point;
-            const objectWorldPos =
-                objetoMovible.object3D.getWorldPosition(
-                    new THREE.Vector3()
-                );
+            const hitPoint = (inter.point ? inter.point.clone() : new THREE.Vector3());
+            const objectWorldPos = objetoMovible.object3D.getWorldPosition(new THREE.Vector3());
 
             worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
             dragTarget.copy(objectWorldPos);
             velocity.set(0, 0, 0);
+            console.log("grab info:", { hitPoint, objectWorldPos, worldGrabOffset });
 
             console.log(
                 "🔴 OBJETO AGARRADO"
@@ -190,8 +220,9 @@ leftController.addEventListener(
             return;
         }
 
-        const mesh = intersections[0].object;
-        const elemento = mesh.el;
+        const inter = intersections[0];
+        const elemento = inter.el || (inter.object && inter.object.el);
+
         if (!elemento) {
             console.log("No se encontró el elemento A-Frame");
             return;
@@ -205,17 +236,14 @@ leftController.addEventListener(
             isDragging = true;
             activeController = leftController;
 
-            const hitPoint = intersections[0].point;
-            const objectWorldPos =
-                objetoMovible.object3D.getWorldPosition(
-                    new THREE.Vector3()
-                );
+            const hitPoint = (inter.point ? inter.point.clone() : new THREE.Vector3());
+            const objectWorldPos = objetoMovible.object3D.getWorldPosition(new THREE.Vector3());
 
             worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
             dragTarget.copy(objectWorldPos);
             velocity.set(0, 0, 0);
 
-            console.log("🔴 OBJETO AGARRADO (LEFT)");
+            console.log("🔴 OBJETO AGARRADO (LEFT)", { hitPoint, objectWorldPos, worldGrabOffset });
         }
     }
 );
@@ -302,7 +330,7 @@ window.addEventListener(
 
         objetoAgarrado = false;
         grabSource = null;
-        dragPlane.makeEmpty();
+        // dragPlane.makeEmpty() removed — Three.Plane has no makeEmpty()
 
     }
 );
