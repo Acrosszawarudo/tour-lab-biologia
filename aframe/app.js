@@ -27,6 +27,10 @@ const objetoMovible =
 const camara =
     document.querySelector("a-camera");
 
+const mouse = new THREE.Vector2();
+const raycasterMouse = new THREE.Raycaster();
+const dragIntersection = new THREE.Vector3();
+
 
 // =====================================================
 // VARIABLES DEL OBJETO
@@ -152,16 +156,31 @@ rightController.addEventListener(
 // =====================================================
 
 objetoMovible.addEventListener(
-    "click",
-    () => {
+    "mousedown",
+    (event) => {
 
         objetoAgarrado = true;
         grabSource = "mouse";
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         console.log(
             "🔴 ESFERA ROJA AGARRADA POR MOUSE"
         );
 
+    }
+);
+
+window.addEventListener(
+    "mousemove",
+    (event) => {
+        if (!objetoAgarrado || grabSource !== "mouse") {
+            return;
+        }
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     }
 );
 
@@ -236,17 +255,16 @@ function actualizarObjeto() {
 
     if (grabSource === "mouse") {
 
-        const cameraWorldPos =
-            new THREE.Vector3();
-        const cameraDir =
-            new THREE.Vector3();
+        const cameraObject =
+            camara.getObject3D("camera");
 
-        camara.object3D.getWorldPosition(
-            cameraWorldPos
-        );
+        if (!cameraObject) {
+            return;
+        }
 
-        camara.object3D.getWorldDirection(
-            cameraDir
+        raycasterMouse.setFromCamera(
+            mouse,
+            cameraObject
         );
 
         const plane = new THREE.Plane(
@@ -254,15 +272,10 @@ function actualizarObjeto() {
             -objetoMovible.object3D.position.y
         );
 
-        const ray = new THREE.Ray(
-            cameraWorldPos,
-            cameraDir
-        );
-
         const intersection =
             new THREE.Vector3();
 
-        ray.intersectPlane(
+        raycasterMouse.ray.intersectPlane(
             plane,
             intersection
         );
