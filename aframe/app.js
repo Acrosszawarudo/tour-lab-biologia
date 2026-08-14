@@ -1,4 +1,3 @@
-
 // =====================================================
 // OBTENER ELEMENTOS
 // =====================================================
@@ -27,68 +26,183 @@ const objetoMovible =
 const camara =
     document.querySelector("a-camera");
 
+
+// =====================================================
+// VARIABLES THREE.JS
+// =====================================================
+
 const mouse = new THREE.Vector2();
-const raycasterMouse = new THREE.Raycaster();
-const dragPlane = new THREE.Plane();
-const dragTarget = new THREE.Vector3();
-const worldGrabOffset = new THREE.Vector3();
-const grabLocalOffset = new THREE.Vector3();
-const localTarget = new THREE.Vector3();
-const velocity = new THREE.Vector3();
-let activeController = null;
 
-// =============================
-// PANEL DE DEBUG EN VR
-// =============================
+const raycasterMouse =
+    new THREE.Raycaster();
 
-function ensureDebugPanel() {
-    if (document.getElementById("debugText")) return;
-    const scene = document.querySelector("a-scene");
-    if (!scene) return;
-    const debug = document.createElement("a-entity");
-    debug.setAttribute("id", "debugText");
-    debug.setAttribute("position", "0 1.6 -1");
-    debug.setAttribute("rotation", "0 0 0");
-    debug.setAttribute("text", "value:; align: left; width: 1.8; color: #FFFFFF; shader: msdf;");
-    scene.appendChild(debug);
-    window.__debugLines = [];
-}
+const dragTarget =
+    new THREE.Vector3();
 
-function showDebug(msg) {
-    try {
-        ensureDebugPanel();
-        window.__debugLines = window.__debugLines || [];
-        const s = (typeof msg === 'object') ? JSON.stringify(msg) : String(msg);
-        // push and keep last 8 lines
-        window.__debugLines.push(s);
-        if (window.__debugLines.length > 8) window.__debugLines.shift();
-        const el = document.getElementById("debugText");
-        if (el) el.setAttribute("text", "value: " + window.__debugLines.join("\n"));
-    } catch (e) {
-        // swallow
-    }
-}
+const controllerPosition =
+    new THREE.Vector3();
 
-// Mirror console.log to on-screen debug panel (keeps original behavior)
-(() => {
-    const orig = console.log.bind(console);
-    console.log = function(...args) {
-        try {
-            const txt = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
-            showDebug(txt);
-        } catch (e) {}
-        orig(...args);
-    };
-})();
+const objectWorldPosition =
+    new THREE.Vector3();
+
+const worldGrabOffset =
+    new THREE.Vector3();
+
+const localTarget =
+    new THREE.Vector3();
+
+const velocity =
+    new THREE.Vector3();
 
 
 // =====================================================
-// VARIABLES DEL OBJETO
+// VARIABLES DE CONTROL
 // =====================================================
 
 let objetoAgarrado = false;
+
 let grabSource = null;
+
+let activeController = null;
+
 let isDragging = false;
+
+
+// =====================================================
+// PANEL DE DEBUG
+// =====================================================
+
+function ensureDebugPanel() {
+
+    if (
+        document.getElementById("debugText")
+    ) {
+        return;
+    }
+
+    const scene =
+        document.querySelector("a-scene");
+
+    if (!scene) {
+        return;
+    }
+
+    const debug =
+        document.createElement("a-entity");
+
+    debug.setAttribute(
+        "id",
+        "debugText"
+    );
+
+    debug.setAttribute(
+        "position",
+        "0 1.6 -1"
+    );
+
+    debug.setAttribute(
+        "rotation",
+        "0 0 0"
+    );
+
+    debug.setAttribute(
+        "text",
+        "value:; align: left; width: 1.8; color: #FFFFFF; shader: msdf;"
+    );
+
+    scene.appendChild(debug);
+
+    window.__debugLines = [];
+}
+
+
+// =====================================================
+// MOSTRAR DEBUG
+// =====================================================
+
+function showDebug(msg) {
+
+    try {
+
+        ensureDebugPanel();
+
+        window.__debugLines =
+            window.__debugLines || [];
+
+        const texto =
+            typeof msg === "object"
+                ? JSON.stringify(msg)
+                : String(msg);
+
+        window.__debugLines.push(texto);
+
+        if (
+            window.__debugLines.length > 8
+        ) {
+
+            window.__debugLines.shift();
+
+        }
+
+        const debug =
+            document.getElementById(
+                "debugText"
+            );
+
+        if (debug) {
+
+            debug.setAttribute(
+                "text",
+                "value: " +
+                window.__debugLines.join("\n")
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+// =====================================================
+// MOSTRAR console.log EN VR
+// =====================================================
+
+(() => {
+
+    const originalLog =
+        console.log.bind(console);
+
+    console.log = function (...args) {
+
+        try {
+
+            const texto =
+                args
+                    .map(
+                        (argumento) =>
+                            typeof argumento === "object"
+                                ? JSON.stringify(argumento)
+                                : String(argumento)
+                    )
+                    .join(" ");
+
+            showDebug(texto);
+
+        } catch (error) {
+
+            // No hacer nada
+        }
+
+        originalLog(...args);
+
+    };
+
+})();
 
 
 // =====================================================
@@ -99,78 +213,90 @@ botonPrueba.addEventListener(
     "click",
     () => {
 
-        console.log("BOTÓN PRESIONADO");
+        console.log(
+            "BOTÓN PRESIONADO"
+        );
 
         botonPrueba.setAttribute(
             "color",
             "#EF4444"
         );
 
-        botonPrueba
-            .querySelector("a-text")
-            .setAttribute(
+        const texto =
+            botonPrueba.querySelector(
+                "a-text"
+            );
+
+        if (texto) {
+
+            texto.setAttribute(
                 "value",
                 "¡FUNCIONA!"
             );
+
+        }
 
     }
 );
 
 
 // =====================================================
-// GATILLO DERECHO
+// FUNCIÓN PARA OBTENER OBJETO DEL RAYCASTER
 // =====================================================
 
-rightController.addEventListener(
-    "triggerdown",
-    () => {
+function obtenerObjetoApuntado(controller) {
 
-        console.log("GATILLO DERECHO");
+    if (!controller) {
 
-        const raycaster =
-            rightController.components.raycaster;
+        return null;
 
-        if (!raycaster) {
+    }
 
-            console.log(
-                "Raycaster no encontrado"
+    const raycasterComponent =
+        controller.components.raycaster;
+
+    if (!raycasterComponent) {
+
+        console.log(
+            "Raycaster no encontrado"
+        );
+
+        return null;
+
+    }
+
+    const intersections =
+        raycasterComponent.intersections;
+
+    if (
+        !intersections ||
+        intersections.length === 0
+    ) {
+
+        console.log(
+            "No estoy apuntando a ningún objeto"
+        );
+
+        return null;
+
+    }
+
+    for (
+        const intersection of intersections
+    ) {
+
+        const elemento =
+            intersection.el ||
+            (
+                intersection.object &&
+                intersection.object.el
             );
-
-            return;
-        }
-
-
-        const intersections =
-            raycaster.intersections;
-
-
-        if (
-            intersections.length === 0
-        ) {
-
-            console.log(
-                "No estoy apuntando a ningún objeto"
-            );
-
-            return;
-        }
-
-
-        // Obtener el objeto detectado
-
-        const inter = intersections[0];
-        const mesh = inter.object;
-        const elemento = inter.el || (mesh && mesh.el);
 
         if (!elemento) {
-            console.log("No se encontró el elemento A-Frame");
-            return;
+
+            continue;
+
         }
-
-        console.log("Objeto detectado:", elemento.id, "(intersect id:", inter.object && inter.object.id, ")");
-
-
-        // Comprobar si es agarrable
 
         if (
             elemento.classList.contains(
@@ -178,264 +304,660 @@ rightController.addEventListener(
             )
         ) {
 
-            objetoAgarrado = true;
-            grabSource = "controller";
-            isDragging = true;
-            activeController = rightController;
-
-            const hitPoint = (inter.point ? inter.point.clone() : new THREE.Vector3());
-            const objectWorldPos = objetoMovible.object3D.getWorldPosition(new THREE.Vector3());
-
-            worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
-            dragTarget.copy(objectWorldPos);
-            velocity.set(0, 0, 0);
-            console.log("grab info:", { hitPoint, objectWorldPos, worldGrabOffset });
-
-            console.log(
-                "🔴 OBJETO AGARRADO"
-            );
+            return {
+                elemento: elemento,
+                intersection: intersection
+            };
 
         }
 
     }
-);
 
-// Left controller support
-leftController.addEventListener(
-    "triggerdown",
-    () => {
-        console.log("GATILLO IZQUIERDO");
+    console.log(
+        "El objeto apuntado no es agarrable"
+    );
 
-        const raycaster =
-            leftController.components.raycaster;
+    return null;
 
-        if (!raycaster) {
-            console.log("Raycaster no encontrado");
-            return;
-        }
+}
 
-        const intersections = raycaster.intersections;
-        if (intersections.length === 0) {
-            console.log("No estoy apuntando a ningún objeto");
-            return;
-        }
 
-        const inter = intersections[0];
-        const elemento = inter.el || (inter.object && inter.object.el);
+// =====================================================
+// AGARRAR OBJETO
+// =====================================================
 
-        if (!elemento) {
-            console.log("No se encontró el elemento A-Frame");
-            return;
-        }
+function agarrarObjeto(controller) {
 
-        console.log("Objeto detectado:", elemento.id);
+    if (objetoAgarrado) {
 
-        if (elemento.classList.contains("grabbable")) {
-            objetoAgarrado = true;
-            grabSource = "controller";
-            isDragging = true;
-            activeController = leftController;
+        return;
 
-            const hitPoint = (inter.point ? inter.point.clone() : new THREE.Vector3());
-            const objectWorldPos = objetoMovible.object3D.getWorldPosition(new THREE.Vector3());
-
-            worldGrabOffset.copy(objectWorldPos).sub(hitPoint);
-            dragTarget.copy(objectWorldPos);
-            velocity.set(0, 0, 0);
-
-            console.log("🔴 OBJETO AGARRADO (LEFT)", { hitPoint, objectWorldPos, worldGrabOffset });
-        }
     }
-);
 
-// =====================================================
-// MOUSE GRAB PARA DESKTOP
-// =====================================================
-window.addEventListener(
-    "mousedown",
-    (event) => {
-
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        const cameraObject = camara.getObject3D("camera");
-
-        if (!cameraObject) {
-            return;
-        }
-
-        raycasterMouse.setFromCamera(
-            mouse,
-            cameraObject
+    const resultado =
+        obtenerObjetoApuntado(
+            controller
         );
 
-        if (!objetoMovible.object3D) {
-            return;
-        }
+    if (!resultado) {
 
-        const intersects =
-            raycasterMouse.intersectObject(
-                objetoMovible.object3D,
-                true
-            );
-
-        if (intersects.length > 0) {
-            objetoAgarrado = true;
-            grabSource = "mouse";
-            isDragging = true;
-
-            const hitPoint = intersects[0].point.clone();
-            const cameraObject = camara.getObject3D("camera");
-
-            if (!cameraObject) {
-                return;
-            }
-
-            grabLocalOffset.copy(
-                cameraObject.worldToLocal(hitPoint)
-            );
-
-            velocity.set(0, 0, 0);
-
-            console.log(
-                "🔴 ESFERA ROJA AGARRADA POR MOUSE"
-            );
-        }
+        return;
 
     }
-);
 
-window.addEventListener(
-    "mousemove",
-    (event) => {
-        if (!objetoAgarrado || grabSource !== "mouse") {
-            return;
-        }
+    const elemento =
+        resultado.elemento;
 
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    const intersection =
+        resultado.intersection;
+
+
+    console.log(
+        "Objeto detectado:",
+        elemento.id
+    );
+
+
+    // -------------------------------------------------
+    // Obtener posición mundial del objeto
+    // -------------------------------------------------
+
+    objetoMovible.object3D.getWorldPosition(
+        objectWorldPosition
+    );
+
+
+    // -------------------------------------------------
+    // Obtener posición donde impactó el láser
+    // -------------------------------------------------
+
+    if (intersection.point) {
+
+        worldGrabOffset
+            .copy(objectWorldPosition)
+            .sub(intersection.point);
+
+    } else {
+
+        worldGrabOffset.set(
+            0,
+            0,
+            0
+        );
+
     }
-);
 
-window.addEventListener(
-    "mouseup",
-    () => {
 
-        if (objetoAgarrado) {
-            console.log(
-                "🔴 OBJETO SOLTADO"
-            );
-        }
+    // -------------------------------------------------
+    // Guardar controlador
+    // -------------------------------------------------
 
-        objetoAgarrado = false;
-        grabSource = null;
-        // dragPlane.makeEmpty() removed — Three.Plane has no makeEmpty()
+    activeController =
+        controller;
 
-    }
-);
+    objetoAgarrado =
+        true;
+
+    isDragging =
+        true;
+
+    grabSource =
+        "controller";
+
+
+    velocity.set(
+        0,
+        0,
+        0
+    );
+
+
+    console.log(
+        "🔴 OBJETO AGARRADO"
+    );
+
+}
 
 
 // =====================================================
 // SOLTAR OBJETO
 // =====================================================
 
+function soltarObjeto(controller) {
+
+    if (
+        !objetoAgarrado
+    ) {
+
+        return;
+
+    }
+
+    if (
+        grabSource !==
+        "controller"
+    ) {
+
+        return;
+
+    }
+
+    if (
+        activeController !==
+        controller
+    ) {
+
+        return;
+
+    }
+
+
+    console.log(
+        "🔴 OBJETO SOLTADO"
+    );
+
+
+    objetoAgarrado =
+        false;
+
+    isDragging =
+        false;
+
+    grabSource =
+        null;
+
+    activeController =
+        null;
+
+}
+
+
+// =====================================================
+// TRIGGER DERECHO
+// =====================================================
+
+rightController.addEventListener(
+    "triggerdown",
+    () => {
+
+        console.log(
+            "🎮 GATILLO DERECHO"
+        );
+
+        agarrarObjeto(
+            rightController
+        );
+
+    }
+);
+
+
 rightController.addEventListener(
     "triggerup",
     () => {
 
-        if (objetoAgarrado) {
-            console.log("🔴 OBJETO SOLTADO");
-        }
-
-        objetoAgarrado = false;
-        if (activeController === rightController) {
-            activeController = null;
-            isDragging = false;
-        }
+        soltarObjeto(
+            rightController
+        );
 
     }
 );
+
+
+// =====================================================
+// TRIGGER IZQUIERDO
+// =====================================================
+
+leftController.addEventListener(
+    "triggerdown",
+    () => {
+
+        console.log(
+            "🎮 GATILLO IZQUIERDO"
+        );
+
+        agarrarObjeto(
+            leftController
+        );
+
+    }
+);
+
 
 leftController.addEventListener(
     "triggerup",
     () => {
-        if (objetoAgarrado) {
-            console.log("🔴 OBJETO SOLTADO");
-        }
-        objetoAgarrado = false;
-        if (activeController === leftController) {
-            activeController = null;
-            isDragging = false;
-        }
+
+        soltarObjeto(
+            leftController
+        );
+
     }
 );
 
 
 // =====================================================
-// ACTUALIZAR POSICIÓN DEL OBJETO
+// MOVIMIENTO DEL OBJETO EN VR
+// =====================================================
+
+function actualizarObjetoVR() {
+
+    if (
+        !objetoAgarrado
+    ) {
+
+        return;
+
+    }
+
+    if (
+        grabSource !==
+        "controller"
+    ) {
+
+        return;
+
+    }
+
+    if (
+        !activeController
+    ) {
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------
+    // Obtener posición mundial del controlador
+    // -------------------------------------------------
+
+    activeController.object3D.getWorldPosition(
+        controllerPosition
+    );
+
+
+    // -------------------------------------------------
+    // Calcular nueva posición
+    // -------------------------------------------------
+
+    dragTarget
+        .copy(controllerPosition)
+        .add(worldGrabOffset);
+
+
+    // -------------------------------------------------
+    // Convertir posición mundial a local
+    // -------------------------------------------------
+
+    if (
+        objetoMovible.object3D.parent
+    ) {
+
+        localTarget.copy(
+            dragTarget
+        );
+
+        objetoMovible.object3D.parent.worldToLocal(
+            localTarget
+        );
+
+    } else {
+
+        localTarget.copy(
+            dragTarget
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // Movimiento suave
+    // -------------------------------------------------
+
+    const currentPosition =
+        objetoMovible.object3D.position;
+
+
+    const smoothing =
+        0.35;
+
+
+    const difference =
+        new THREE.Vector3()
+            .subVectors(
+                localTarget,
+                currentPosition
+            )
+            .multiplyScalar(
+                smoothing
+            );
+
+
+    velocity
+        .add(difference)
+        .multiplyScalar(0.75);
+
+
+    currentPosition.add(
+        velocity
+    );
+
+}
+
+
+// =====================================================
+// MOUSE - AGARRAR
+// =====================================================
+
+window.addEventListener(
+    "mousedown",
+    (event) => {
+
+        if (!camara) {
+
+            return;
+
+        }
+
+
+        mouse.x =
+            (event.clientX /
+                window.innerWidth) *
+            2 - 1;
+
+        mouse.y =
+            -(event.clientY /
+                window.innerHeight) *
+            2 + 1;
+
+
+        const cameraObject =
+            camara.getObject3D(
+                "camera"
+            );
+
+
+        if (!cameraObject) {
+
+            return;
+
+        }
+
+
+        raycasterMouse.setFromCamera(
+            mouse,
+            cameraObject
+        );
+
+
+        if (
+            !objetoMovible.object3D
+        ) {
+
+            return;
+
+        }
+
+
+        const intersections =
+            raycasterMouse.intersectObject(
+                objetoMovible.object3D,
+                true
+            );
+
+
+        if (
+            intersections.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        objetoAgarrado =
+            true;
+
+        grabSource =
+            "mouse";
+
+        isDragging =
+            true;
+
+
+        velocity.set(
+            0,
+            0,
+            0
+        );
+
+
+        console.log(
+            "🔴 ESFERA ROJA AGARRADA POR MOUSE"
+        );
+
+    }
+);
+
+
+// =====================================================
+// MOUSE - MOVER
+// =====================================================
+
+window.addEventListener(
+    "mousemove",
+    (event) => {
+
+        if (
+            !objetoAgarrado ||
+            grabSource !== "mouse"
+        ) {
+
+            return;
+
+        }
+
+
+        mouse.x =
+            (event.clientX /
+                window.innerWidth) *
+            2 - 1;
+
+        mouse.y =
+            -(event.clientY /
+                window.innerHeight) *
+            2 + 1;
+
+    }
+);
+
+
+// =====================================================
+// MOUSE - SOLTAR
+// =====================================================
+
+window.addEventListener(
+    "mouseup",
+    () => {
+
+        if (
+            !objetoAgarrado
+        ) {
+
+            return;
+
+        }
+
+
+        console.log(
+            "🔴 OBJETO SOLTADO"
+        );
+
+
+        objetoAgarrado =
+            false;
+
+        isDragging =
+            false;
+
+        grabSource =
+            null;
+
+        activeController =
+            null;
+
+    }
+);
+
+
+// =====================================================
+// ACTUALIZAR OBJETO CON MOUSE
+// =====================================================
+
+function actualizarObjetoMouse() {
+
+    if (
+        !objetoAgarrado ||
+        grabSource !== "mouse"
+    ) {
+
+        return;
+
+    }
+
+
+    const cameraObject =
+        camara.getObject3D(
+            "camera"
+        );
+
+
+    if (!cameraObject) {
+
+        return;
+
+    }
+
+
+    const cameraWorldPosition =
+        new THREE.Vector3();
+
+
+    cameraObject.getWorldPosition(
+        cameraWorldPosition
+    );
+
+
+    const cameraDirection =
+        new THREE.Vector3();
+
+
+    cameraObject.getWorldDirection(
+        cameraDirection
+    );
+
+
+    // -------------------------------------------------
+    // Distancia a la que se mantiene la esfera
+    // -------------------------------------------------
+
+    const holdDistance =
+        1.2;
+
+
+    dragTarget
+        .copy(cameraWorldPosition)
+        .add(
+            cameraDirection.multiplyScalar(
+                holdDistance
+            )
+        );
+
+
+    // -------------------------------------------------
+    // Convertir a posición local
+    // -------------------------------------------------
+
+    if (
+        objetoMovible.object3D.parent
+    ) {
+
+        localTarget.copy(
+            dragTarget
+        );
+
+        objetoMovible.object3D.parent.worldToLocal(
+            localTarget
+        );
+
+    } else {
+
+        localTarget.copy(
+            dragTarget
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // Movimiento suave
+    // -------------------------------------------------
+
+    const currentPosition =
+        objetoMovible.object3D.position;
+
+
+    const smoothing =
+        0.22;
+
+
+    const difference =
+        new THREE.Vector3()
+            .subVectors(
+                localTarget,
+                currentPosition
+            )
+            .multiplyScalar(
+                smoothing
+            );
+
+
+    velocity
+        .add(difference)
+        .multiplyScalar(0.85);
+
+
+    currentPosition.add(
+        velocity
+    );
+
+}
+
+
+// =====================================================
+// ACTUALIZAR OBJETO
 // =====================================================
 
 function actualizarObjeto() {
 
-    if (!objetoAgarrado) {
-        return;
+    if (
+        grabSource ===
+        "controller"
+    ) {
+
+        actualizarObjetoVR();
+
     }
 
-    if (grabSource === "controller") {
-        if (!activeController) return;
-        const controllerPosition = new THREE.Vector3();
-        activeController.object3D.getWorldPosition(controllerPosition);
-        dragTarget.copy(controllerPosition).add(worldGrabOffset);
 
-    } else if (grabSource === "mouse") {
+    if (
+        grabSource ===
+        "mouse"
+    ) {
 
-        const cameraObject =
-            camara.getObject3D("camera");
+        actualizarObjetoMouse();
 
-        if (!cameraObject) {
-            return;
-        }
-
-        const cameraWorldPos =
-            new THREE.Vector3();
-        cameraObject.getWorldPosition(cameraWorldPos);
-
-        const cameraDir =
-            new THREE.Vector3();
-        cameraObject.getWorldDirection(cameraDir);
-
-        const holdDistance = 1.2;
-        const desiredWorldPos =
-            cameraWorldPos.add(
-                cameraDir.multiplyScalar(
-                    holdDistance
-                )
-            );
-
-        dragTarget.copy(desiredWorldPos);
-
-    } else {
-        return;
-    }
-
-    const currentLocal =
-        objetoMovible.object3D.position;
-
-    localTarget.copy(dragTarget);
-    objetoMovible.object3D.parent.worldToLocal(
-        localTarget
-    );
-
-    const smoothing = 0.22;
-    const delta = new THREE.Vector3()
-        .subVectors(localTarget, currentLocal)
-        .multiplyScalar(smoothing);
-
-    velocity.add(delta).multiplyScalar(0.85);
-    currentLocal.add(velocity);
-
-    if (!objetoAgarrado && velocity.lengthSq() < 0.00001) {
-        velocity.set(0, 0, 0);
     }
 
 }
@@ -449,7 +971,9 @@ volver.addEventListener(
     "click",
     () => {
 
-        console.log("VOLVER PRESIONADO");
+        console.log(
+            "VOLVER PRESIONADO"
+        );
 
         window.location.href =
             "../index.html";
@@ -473,6 +997,8 @@ function loop() {
 }
 
 
-// Iniciar loop
+// =====================================================
+// INICIAR
+// =====================================================
 
 loop();

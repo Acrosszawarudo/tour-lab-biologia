@@ -225,7 +225,7 @@
         laser-controls="hand: left"
         meta-touch-controls="hand: left"
         raycaster="
-            objects: .clickable;
+            objects: .clickable, .grabbable;
             far: 10;
         "
         line="
@@ -263,7 +263,9 @@
 
         <a-cursor
             cursor="rayOrigin: mouse"
-            raycaster="objects: .clickable, .grabbable"
+            raycaster="
+                objects: .clickable, .grabbable;
+            "
             fuse="false"
             color="#FFFFFF">
         </a-cursor>
@@ -273,6 +275,10 @@
 
 </a-scene>
 
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
 
 <script src="app.js"></script>
 
