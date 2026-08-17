@@ -1,50 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head >
 
-    <title>Laboratorio - Mitosis</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
-  </head>
-  <body>
-    <a-scene>
-      <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-      <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-      <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-      <a-plane position="0 0 -4" rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
-      <a-sky color="#ECECEC"></a-sky>
+    <title>Laboratorio VR - Mitosis</title>
+
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- =========================================================
+         INFORMACIÓN DE LA FASE
+    ========================================================== -->
+
+    <div id="info-panel">
+
+        <h1 id="phase-title">Interfase</h1>
+
+        <p id="phase-description">
+            La célula crece y duplica su ADN antes de comenzar la mitosis.
+        </p>
+
+        <div id="phase-counter">
+            Fase 1 / 7
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         CONTROLES DE ESCRITORIO
+    ========================================================== -->
+
+    <div id="controls">
+
+        <button id="previous-btn">
+            ◀ Anterior
+        </button>
+
+        <button id="next-btn">
+            Siguiente ▶
+        </button>
+
+        <button id="reset-btn">
+            ↻ Reiniciar
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         ESCENA A-FRAME
+    ========================================================== -->
+
+    <a-scene
+        id="mitosis-scene"
+        background="color: #050816"
+        renderer="colorManagement: true; physicallyCorrectLights: true"
+        vr-mode-ui="enabled: true"
+    >
+
+        <!-- =====================================================
+             CÁMARA
+        ====================================================== -->
+
+        <a-entity id="camera-rig">
+
+            <a-camera
+                position="0 1.6 6"
+                look-controls="enabled: true"
+            >
+
+                <!-- Cursor para escritorio -->
+
+                <a-cursor
+                    raycaster="objects: .clickable"
+                    fuse="false"
+                    material="color: #FFFFFF; shader: flat"
+                ></a-cursor>
+
+            </a-camera>
+
+
+            <!-- Control izquierdo -->
+
+            <a-entity
+                id="left-controller"
+                laser-controls="hand: left"
+                raycaster="objects: .clickable"
+            ></a-entity>
+
+
+            <!-- Control derecho -->
+
+            <a-entity
+                id="right-controller"
+                laser-controls="hand: right"
+                raycaster="objects: .clickable"
+            ></a-entity>
+
+        </a-entity>
+
+
+        <!-- =====================================================
+             ILUMINACIÓN
+        ====================================================== -->
+
+        <a-light
+            type="ambient"
+            intensity="1.5"
+        ></a-light>
+
+        <a-light
+            type="point"
+            position="0 4 4"
+            intensity="3"
+        ></a-light>
+
+
+        <!-- =====================================================
+             CÉLULA
+        ====================================================== -->
+
+        <a-entity id="cell"     
+          id="cell"
+          position="0 1 0"
+        >
+
+            <!-- Membrana celular -->
+
+            <a-sphere
+                id="cell-membrane"
+                radius="3"
+                material="
+                    color:#3f8cff;
+                    transparent:true;
+                    opacity:0.12;
+                    side:double;
+                    roughness:0.3;
+                "
+            ></a-sphere>
+
+
+            <!-- Núcleo -->
+
+            <a-sphere
+                id="nucleus"
+                radius="1.5"
+                material="
+                    color:#9146ff;
+                    transparent:true;
+                    opacity:0.22;
+                    side:double;
+                "
+            ></a-sphere>
+
+
+            <!-- Cromatina -->
+
+            <a-entity id="chromatin">
+
+                <a-sphere
+                    position="-0.5 0.3 0"
+                    radius="0.12"
+                    color="#ff4fa3"
+                ></a-sphere>
+
+                <a-sphere
+                    position="0.2 -0.2 0.3"
+                    radius="0.12"
+                    color="#ff4fa3"
+                ></a-sphere>
+
+                <a-sphere
+                    position="0.5 0.4 -0.2"
+                    radius="0.12"
+                    color="#ff4fa3"
+                ></a-sphere>
+
+                <a-sphere
+                    position="-0.3 -0.5 -0.2"
+                    radius="0.12"
+                    color="#ff4fa3"
+                ></a-sphere>
+
+            </a-entity>
+
+
+            <!-- Cromosomas -->
+
+            <a-entity id="chromosomes"></a-entity>
+
+
+            <!-- Centrosomas -->
+
+            <a-entity id="centrosomes">
+
+                <a-sphere
+                    id="centrosome-left"
+                    position="-2 0 0"
+                    radius="0.18"
+                    color="#00ffff"
+                ></a-sphere>
+
+                <a-sphere
+                    id="centrosome-right"
+                    position="2 0 0"
+                    radius="0.18"
+                    color="#00ffff"
+                ></a-sphere>
+
+            </a-entity>
+
+
+            <!-- Huso mitótico -->
+
+            <a-entity id="spindle"></a-entity>
+
+        </a-entity>
+
+
+        <!-- =====================================================
+             TEXTO DENTRO DEL MUNDO
+        ====================================================== -->
+
+        <a-entity
+            position="0 -2.5 0"
+            text="
+                value: MITOSIS;
+                align:center;
+                width:6;
+                color:#FFFFFF;
+                font:roboto;
+            "
+        ></a-entity>
+
+
+        <!-- =====================================================
+             PISO
+        ====================================================== -->
+
+        <a-plane
+            rotation="-90 0 0"
+            width="20"
+            height="20"
+            color="#080d1d"
+        ></a-plane>
+
+
+        <!-- =====================================================
+             SONIDO AMBIENTE
+        ====================================================== -->
+
+        <!-- Puedes añadir audio posteriormente -->
+
     </a-scene>
 
-    <a-entity
-        id="player"
-        position="0 1.6 0"
-        dynamic-body>
 
-        <a-camera
-            id="camera"
-            position="0 1.6 0"
-            wasd-controls>
-        </a-camera>
+    <script src="js/mitosis.js"></script>
 
-        <a-entity
-            id="leftController"
-            laser-controls="hand: left">
-        </a-entity>
+</body>
 
-        <a-entity
-            id="rightController"
-            laser-controls="hand: right">
-        </a-entity>
-
-    </a-entity>
-
-    <a-box
-        static-body
-        position="0 0 -4"
-        width="10"
-        height="0.2"
-        depth="10">
-    </a-box>
-    
-  </body>
 </html>
