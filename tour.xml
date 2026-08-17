@@ -1129,18 +1129,6 @@
 		</image>
 
 		<hotspot
-			name="spot7"
-			style="pisada"
-			url="images/pisada.png"
-			ath="-84.65992335793976" 
-			atv="22.53649413722977"
-			linkedscene="scene_IMG_20260528_153130_00_033"
-			hlookat="0.9961938"
-			vlookat="3.8733444"
-			fov="90"
-		/>
-
-		<hotspot
 			name="spot6"
 			style="pisada"
 			url="images/pisada.png"
@@ -1427,7 +1415,7 @@
 			bordercolor="0xFFFFFF"
 			borderalpha="1.0"
 			borderwidth="2"
-			onclick="on_click_polygon_hot_plate();">
+			onclick="on_click_polygon_balanza(); ">
 			<point ath="90.99934594507013" atv="9.648772919843408" />
 			<point ath="90.70960938931401" atv="14.071888229617137" />
 			<point ath="100.92077894506991" atv="13.93057270403413" />
@@ -1440,7 +1428,7 @@
 			bordercolor="0xFFFFFF"
 			borderalpha="1.0"
 			borderwidth="2"
-			onclick="on_click_polygon_balanza();">
+			onclick="on_click_polygon_hot_plate();">
 			<point ath="73.06436419744523" atv="8.85651657901216" />
 			<point ath="71.6205011654265" atv="12.52238496351013" />
 			<point ath="77.10769757001873" atv="12.958190230516001" />
@@ -1501,18 +1489,6 @@
 		</image>
 
 		<hotspot
-			name="spot6"
-			style="pisada"
-			url="images/pisada.png"
-			ath="2.18417023734617" 
-			atv="11.54342605462306"
-			linkedscene="scene_IMG_20260528_153343_00_034"
-			hlookat="44.9961938"
-			vlookat="3.8733444"
-			fov="90"
-		/>
-
-		<hotspot
 			name="spot7"
 			style="pisada"
 			url="images/pisada.png"
@@ -1530,7 +1506,7 @@
 			bordercolor="0xFFFFFF"
 			borderalpha="1.0"
 			borderwidth="2"
-			onclick="quiz_select(newhs_0, true);">
+			onclick="quiz_select(newhs_0, false);">
 			<point ath="90.99934594507013" atv="9.648772919843408" />
 			<point ath="90.70960938931401" atv="14.071888229617137" />
 			<point ath="100.92077894506991" atv="13.93057270403413" />
@@ -1543,7 +1519,7 @@
 			bordercolor="0xFFFFFF"
 			borderalpha="1.0"
 			borderwidth="2"
-			onclick="quiz_select(newhs_2, false);">
+			onclick="quiz_select(newhs_2, true);">
 			<point ath="73.06436419744523" atv="8.85651657901216" />
 			<point ath="71.6205011654265" atv="12.52238496351013" />
 			<point ath="77.10769757001873" atv="12.958190230516001" />
@@ -1721,19 +1697,6 @@
 		<image if="webvr.isenabled OR device.mobilevr">
 			<cube url="panos/IMG_20260528_153343_00_034.tiles/vr/pano_%s.jpg" />
 		</image>
-
-		<hotspot
-			name="spot7"
-			style="pisada"
-			url="images/pisada.png"
-			ath="32.23607965374941" 
-			atv="8.26080947009676"
-			onclick="loadscene(scene_IMG_20260528_153541_00_035, null, MERGE, BLEND(1)); lookto(104, 10, 120);"
-			linkedscene=""
-			hlookat="44.9961938"
-			vlookat="3.8733444"
-			fov="90"
-		/>
 
 		<hotspot
 			name="spot8"
