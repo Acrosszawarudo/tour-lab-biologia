@@ -892,7 +892,6 @@ function resetSimulation() {
 
 
     /*
-     * Eliminar animaciones
      */
 
     membrane.removeAttribute(
@@ -914,7 +913,6 @@ function resetSimulation() {
 
 
     /*
-     * Regenerar cromosomas
      */
 
     generateChromosomes();
