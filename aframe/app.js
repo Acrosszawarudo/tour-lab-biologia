@@ -3,6 +3,20 @@
 // OBTENER ELEMENTOS
 // =====================================================
 
+AFRAME.registerComponent("mitosis-model-position", {
+    init() {
+        this.el.addEventListener("model-loaded", () => {
+            const model = this.el.getObject3D("mesh");
+            if (!model) return;
+
+            const bounds = new THREE.Box3().setFromObject(model);
+            const center = bounds.getCenter(new THREE.Vector3());
+            this.el.object3D.worldToLocal(center);
+            model.position.sub(center);
+        });
+    }
+});
+
 const botonPrueba =
     document.getElementById("botonPrueba");
 
