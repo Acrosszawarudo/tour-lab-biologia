@@ -240,7 +240,7 @@
         laser-controls="hand: left"
         meta-touch-controls="hand: left"
         raycaster="
-            objects: .clickable;
+            objects: .clickable, .grabbable;
             far: 10;
         "
         line="
@@ -273,21 +273,38 @@
     <!-- CÁMARA -->
     <!-- ================================================= -->
 
-    <a-camera
+    <a-entity
+        id="player"
         position="0 1.6 0">
 
-        <a-cursor
-            cursor="rayOrigin: mouse"
-            raycaster="objects: .clickable, .grabbable"
-            fuse="false"
-            color="#FFFFFF">
-        </a-cursor>
+        <a-camera
+            position="0 0 0"
+            look-controls
+            wasd-controls="
+                acceleration: 25;
+                fly: false;
+            ">
 
-    </a-camera>
+            <a-cursor
+                cursor="rayOrigin: mouse"
+                raycaster="
+                    objects: .clickable, .grabbable;
+                "
+                fuse="false"
+                color="#FFFFFF">
+            </a-cursor>
+
+        </a-camera>
+
+    </a-entity>
 
 
 </a-scene>
 
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
 
 <script src="app.js"></script>
 
