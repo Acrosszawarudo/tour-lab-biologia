@@ -16,6 +16,41 @@ AFRAME.registerComponent("mitosis-model-position", {
     }
 });
 
+AFRAME.registerComponent("mitosis-model-animation", {
+    init() {
+        this.mixer = null;
+
+        this.el.addEventListener("model-loaded", (event) => {
+            const model = event.detail.model || this.el.getObject3D("mesh");
+            const animations = model && model.animations;
+
+            if (!model || !animations || animations.length === 0) {
+                console.warn("El modelo no contiene animaciones");
+                return;
+            }
+
+            this.mixer = new THREE.AnimationMixer(model);
+
+            animations.forEach((clip) => {
+                this.mixer.clipAction(clip).play();
+            });
+        });
+    },
+
+    tick(time, delta) {
+        if (this.mixer) {
+            this.mixer.update(delta / 1000);
+        }
+    },
+
+    remove() {
+        if (this.mixer) {
+            this.mixer.stopAllAction();
+            this.mixer = null;
+        }
+    }
+});
+
 const botonPrueba =
     document.getElementById("botonPrueba");
 
