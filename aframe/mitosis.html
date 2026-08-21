@@ -224,6 +224,29 @@
 
         </a-entity>
 
+        <!-- ================================================= -->
+        <!-- GLB de Prueba -->
+        <!-- ================================================= -->
+
+        <a-assets>
+            <a-asset-item id="mitosis-stage-3" src="mitosis_stage_3.glb"></a-asset-item>
+            <a-asset-item id="mitosis-model" src="mitosis.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity
+            gltf-model="#mitosis-stage-3"
+            position="3 1.7 -4"
+            scale="0.01 0.01 0.01"
+            mitosis-model-position>
+        </a-entity>
+
+        <a-entity
+            gltf-model="#mitosis-model"
+            position="-2 1 -2"
+            scale="0.7 0.7 0.7"
+            mitosis-model-position
+            mitosis-model-animation>
+        </a-entity>
 
         <!-- =====================================================
              TEXTO DENTRO DEL MUNDO

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Model Viewer AR - VR</title>
+  <meta name="description" content="Model Viewer (VR / AR) • A-Frame">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js" integrity="sha384-REPLACE_WITH_THE_PUBLISHED_AFRAME_1_8_0_SHA384_HASH" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@gh-pages/examples/js/info-message.js"></script>
+  <script src="animation-mixer.js"></script>
+  <script src="ar-shadows.js"></script>
+  <script src="model-viewer.js"></script>
+  <script src="background-gradient.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@gh-pages/examples/js/remix-dropdown.js"></script>
+  </head>
+<body>
+
+<a-scene
+  info-message="htmlSrc: #messageText"
+  model-viewer="gltfModel: #triceratops; title: Triceratops"
+  xr-mode-ui="XRMode: xr">
+  <a-assets timeout="10000">
+    <!--
+      Model source: https://sketchfab.com/3d-models/triceratops-d16aabe33dc24f8ab37e3df50c068265
+      Model author: https://sketchfab.com/VapTor
+      Model license: Sketchfab Standard
+    -->
+    <a-asset-item id="triceratops"
+      src="https://cdn.aframe.io/examples/ar/models/triceratops/scene.gltf"
+      response-type="arraybuffer"></a-asset-item>
+
+    <img id="shadow" src="shadow.png" alt="">
+    <a-asset-item id="messageText" src="message.html"></a-asset-item>
+  </a-assets>
+</a-scene>
+</body>
+</html>
